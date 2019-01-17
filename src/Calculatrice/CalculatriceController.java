@@ -13,7 +13,7 @@ public class CalculatriceController {
 	private TextField displayField;
 	
 	@FXML
-	private Text currentCalculus;
+	private TextField currentCalculus;
 	
 	double leftValue, rightValue;
 	
@@ -71,13 +71,15 @@ public class CalculatriceController {
 	@FXML
 	private void hoverButtonEnter(Event e) {
 		Button b = (Button)e.getSource();
-		b.setStyle("-fx-background-color:"+buttonHoverColor+";");
+		b.setStyle("-fx-background-color:"+buttonHoverColor+";"
+				+ "-fx-border-color:grey;"
+				+ "-fx-border-width:1;");
 	}
 	
 	@FXML
 	private void hoverButtonExit(Event e) {
 		Button b = (Button)e.getSource();
-		b.setStyle("-fx-background-color:fafafa;");
+		b.setStyle("");
 	}
 
 }
