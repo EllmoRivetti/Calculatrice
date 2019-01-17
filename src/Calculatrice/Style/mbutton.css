@@ -1,0 +1,7 @@
+.button{
+	-fx-background-color:"#e6e6e6";
+	-fx-border-width:0;
+	-fx-background-radius:0;
+	-fx-font-size:15px;
+	-fx-font-weight:bold;
+}
