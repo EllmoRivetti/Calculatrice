@@ -4,8 +4,6 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.scene.text.Text;
-
 
 public class CalculatriceController {
 
@@ -17,14 +15,12 @@ public class CalculatriceController {
 
 	private CalculatriceModel model;
 
-	double sum = 0;
-
 	String calculusType = "+";
-	
+
 	boolean resultDisplayed = false;
 	boolean first = true;
+	boolean wasOperator = false;
 
-	private final static String buttonHoverColor = "#e0e0e0";
 
 	@FXML
 	public void initialize() {
@@ -42,50 +38,64 @@ public class CalculatriceController {
 		}
 		String nb = ((Button)e.getSource()).getText();
 		model.setDisplayValue(nb);
-		model.setCurrentCalculus(nb);
+		wasOperator = false;
+		//model.setCurrentCalculus(nb);
 	}
 
 	@FXML
 	private void operationClick(Event e) {
-		if(first) {
-			model.setTotalResult(Double.parseDouble(model.getDisplayValue()));
-			first = false;
+		if(!wasOperator) {
+			if(first) {
+				model.setTotalResult(Double.parseDouble(model.getDisplayValue()));
+				first = false;
+			}
+
+			String s = ((Button)e.getSource()).getText();
+
+			if(resultDisplayed) {
+				resultDisplayed = false;
+				model.setCurrentCalculus(s);
+			}else {
+				model.setCurrentCalculus(model.getDisplayValue()+s);
+			}
+
+			model.resetDisplayValue();
+			calculusType = s;
+			wasOperator = true;
 		}
-		
-		if(resultDisplayed) {
-			resultDisplayed = false;
-		}
-		String s = ((Button)e.getSource()).getText();
-		model.setCurrentCalculus(s);
-		model.resetDisplayValue();
-		calculusType = s;
 	}
 
 	@FXML
 	private void displayResult(Event e) {
-		if(model.getDisplayValue() != "") {
-			double res = 0;
-			
-			switch(calculusType) {
-			case "+":
-				res = doPlus();
-				break;
-			case "-":
-				res = doMinus();
-				break;
-			case "/":
-				res = doDivide();
-				break;
-			case "x":
-				res = doMultiply();
-				break;
-			default:
-				break;
+		try {
+			if(model.getDisplayValue() != "") {
+				double res = 0;
+
+				switch(calculusType) {
+				case "+":
+					res = model.doPlus();
+					break;
+				case "-":
+					res = model.doMinus();
+					break;
+				case "/":
+					res = model.doDivide();
+
+					break;
+				case "x":
+					res = model.doMultiply();
+					break;
+				default:
+					break;
+				}
+				model.setTotalResult(res);
+				model.setCurrentCalculus(model.getDisplayValue());
+				model.resetDisplayValue();
+				model.setDisplayValue(Double.toString(model.getTotalResult()));
+				resultDisplayed = true;
 			}
-			model.setTotalResult(res);
+		}catch(DivideByZeroException err) {
 			model.resetDisplayValue();
-			model.setDisplayValue(Double.toString(model.getTotalResult()));
-			resultDisplayed = true;
 		}
 	}
 
@@ -97,26 +107,52 @@ public class CalculatriceController {
 		first = true;
 	}
 
-	/*******Operation function*******/
+	@FXML
+	private void deleteCurrentDisplay() {
+		model.resetDisplayValue();
+	}
 
-	private double doPlus() {
-		return Double.parseDouble(model.getDisplayValue()) + model.getTotalResult();
+	@FXML
+	private void negate() {
+		model.negate();
 	}
-	
-	private double doMinus() {
-		return model.getTotalResult() - Double.parseDouble(model.getDisplayValue());
+
+	@FXML
+	private void removeLastNb() {
+		model.removeLastNumber();
 	}
-	
-	private double doDivide() {
-		if(model.getDisplayValue() == "0")
+
+	@FXML
+	private void square() {
+		model.setTotalResult(model.doSquare());
+		model.setCurrentCalculus(model.getDisplayValue()+"²");
+		model.resetDisplayValue();
+		model.setDisplayValue(Double.toString(model.getTotalResult()));
+		resultDisplayed = true;
+	}
+
+	@FXML
+	private void inverse() {
+		try {
+			model.setTotalResult(model.doInverse());
+			model.setCurrentCalculus("1/("+model.getDisplayValue()+")");
 			model.resetDisplayValue();
-		return model.getTotalResult() / Double.parseDouble(model.getDisplayValue());
-	}
-	
-	private double doMultiply() {
-		return Double.parseDouble(model.getDisplayValue()) * model.getTotalResult();
-	}
+			model.setDisplayValue(Double.toString(model.getTotalResult()));
+			resultDisplayed = true;
+		}catch(DivideByZeroException e) {
 
+		}
+
+	}
+	@FXML
+	private void squareRoot() {
+		model.setTotalResult(model.doSquareRoot());
+		model.setCurrentCalculus("√("+model.getDisplayValue()+")");
+		model.resetDisplayValue();
+		model.setDisplayValue(Double.toString(model.getTotalResult()));
+		resultDisplayed = true;
+
+	}
 
 	/*******Style function*******/
 
@@ -124,15 +160,23 @@ public class CalculatriceController {
 	@FXML
 	private void hoverButtonEnter(Event e) {
 		Button b = (Button)e.getSource();
-		b.setStyle("-fx-background-color:"+buttonHoverColor+";"
+		b.setStyle("-fx-background-color:#e0e0e0;"
 				+ "-fx-border-color:grey;"
 				+ "-fx-border-width:1;");
 	}
 
 	@FXML
-	private void hoverButtonExit(Event e) {
+	private void resetButtonStyle(Event e) {
 		Button b = (Button)e.getSource();
 		b.setStyle("");
+	}
+
+	@FXML
+	private void clickButtonCommon(Event e) {
+		Button b = (Button)e.getSource();
+		b.setStyle("-fx-background-color:#cadbf7;"
+				+ "-fx-border-color:grey;"
+				+ "-fx-border-width:1;");
 	}
 
 }
